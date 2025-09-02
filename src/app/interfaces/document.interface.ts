@@ -12,7 +12,7 @@ export interface Document {
     companyName: string;
     companyAddress: string;
     companyEmail: string;
-    companyPhone: number;
+    companyPhone: string;
     customerName: string;
     customerAddress: string;
     customerEmail: string;
