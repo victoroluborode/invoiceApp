@@ -1,0 +1,93 @@
+<div class="invoice-form-container">
+    <form [formGroup]="documentForm" (ngSubmit)="onSave()">
+        <h2>{{ documentType() | titlecase }} Details</h2>
+
+        <div class="form-section">
+            <label for="type">Document Type:</label>
+            <select id="type" formControlName="type">
+                <option value="invoice">Invoice</option>
+                <option value="quotation">Quotation</option>
+                <option value="receipt">Receipt</option>
+            </select>
+        </div>
+
+        <div class="form-section">
+            <label for="date">Date</label>
+            <input type="date" id="date" formControlName="date">
+        </div>
+
+        <div class="form-section">
+            <h3>Company Information</h3>
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" formControlName="companyName">
+
+            <label for="companyAddress">Company Address</label>
+            <textarea id="companyAddress" formControlName="companyAddress"></textarea>
+
+            <label for="companyEmail">Company Email</label>
+            <input type="email" id="companyEmail" formControlName="companyEmail">
+
+            <label for="companyPhone">Company Phone</label>
+            <input type="tel" id="companyPhone" formControlName="companyPhone">
+        </div>
+
+        <div class="form-section">
+            <h3>Customer Information</h3>
+            <label for="customerName">Customer Name</label>
+            <input type="text" id="customerName" formControlName="customerName">
+
+            <label for="customerAddress">Customer Address</label>
+            <textarea id="customerAddress" formControlName="customerAddress"></textarea>
+
+            <label for="customerEmail">Customer Email</label>
+            <input type="email" id="customerEmail" formControlName="customerEmail">
+        </div>
+
+        <div class="form-section">
+            <h3>Items</h3>
+            <div formArrayName="items">
+                <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="line-item-row">
+                    <div class="item-fields">
+                        <label for="description">Description</label>
+                        <input type="text" formControlName="description">
+
+                        <label for="quantity">Quantity</label>
+                        <input type="number" formControlName="quantity" (input)="calculateItems(i)">
+
+                        <label for="price">Price</label>
+                        <input type="number" formControlName="price" (input)="calculateItems(i)">
+                    </div>
+                    <div class="item-total">
+                        Total: {{ item.get('total')?.value | currency }}
+                    </div>
+                    <button type="button" (click)="removeItem(i)">Remove</button>
+                </div>
+            </div>
+            <button type="button" (click)="addItem()">Add Item</button>
+        </div>
+
+        <div class="form-section">
+            <h3>Totals</h3>
+            <div class="totals-row">
+                <label>Subtotal:</label>
+                <span>{{ documentForm.get('subTotal')?.value | currency }}</span>
+            </div>
+            <div class="totals-row">
+                <label>Tax Rate:</label>
+                <input type="number" formControlName="taxRate" (input)="calculateTotal()">
+            </div>
+            <div class="totals-row">
+                <label>Tax Amount:</label>
+                <span>{{ documentForm.get('taxAmount')?.value | currency }}</span>
+            </div>
+            <div class="totals-row grand-total">
+                <label>Total:</label>
+                <span>{{ documentForm.get('total')?.value | currency }}</span>
+            </div>
+        </div>
+
+        <div class="form-section save-button">
+            <button type="submit">Save Document</button>
+        </div>
+    </form>
+</div>

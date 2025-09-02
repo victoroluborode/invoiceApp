@@ -1,55 +1,102 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Document} from '../../interfaces/document.interface';
+import { Component, input, output, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormControl, FormArray, FormBuilder, ReactiveFormsModule, Validators, FormGroup} from '@angular/forms';
+import { Document } from '../../interfaces/document.interface';
 import { storageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-invoice-form',
+  standalone: true,
   templateUrl: './invoiceForm.component.html',
   styleUrls: ['./invoiceForm.component.css'],
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class InvoiceFormComponent implements OnInit {
-    constructor(private storageService: storageService) { }
-    
-    document: Document = {
-        type: 'invoice',
-            number: '',
-            date: '',
-            companyName: '',
-            companyAddress: '',
-            companyEmail: '',
-            companyPhone: '',
-            customerName: '',
-            customerAddress: '',
-            customerEmail: '',
-            items: [],
-            subTotal: 0,
-            taxRate: 0,
-            taxAmount: 0,
-            total: 0,
-            notes: '',
-    }
-  ngOnInit(): void {}
+  documentType = input<'invoice' | 'quotation' | 'receipt'>('invoice');
+  formSubmit = output<FormGroup>()
+  documentForm!: FormGroup;
 
-    addItem(): void {
-        this.document.items.push({
-            description: '',
-            quantity: 0,
-            price: 0,
-            total: 0
-        })
-    }
+  constructor(private fb: FormBuilder) {}
 
-    removeItem(index: number): void {
-        this.document.items.splice(index, 1)
-    }
+  ngOnInit(): void {
+    this.documentForm = this.fb.group({
+      type: [this.documentType()],
+      number: [this.generateDocumentNumber(), Validators.required],
+      date: ['', Validators.required],
+      companyName: ['', Validators.required],
+      companyAddress: ['', Validators.required],
+      companyEmail: ['', [Validators.required, Validators.email]],
+      companyPhone: ['', Validators.required],
+      customerName: ['', Validators.required],
+      customerAddress: ['', Validators.required],
+      customerEmail: ['', [Validators.required, Validators.email]],
+      items: this.fb.array([]),
+      subTotal: [0],
+      taxRate: [0],
+      taxAmount: [0],
+      total: [0],
+      notes: [''],
+    });
 
-    calculateItems(index: number): void {
-        const item = this.document.items[index];
-        item.total = item.quantity * item.price
-    }
+    this.addItem();
+  }
 
-    calculateTotals(index: number): void {
-        this.document.subTotal = this.
+  get items(): FormArray {
+    return this.documentForm.get('items') as FormArray;
+  }
+  addItem(): void {
+    this.items.push(
+      this.fb.group({
+        description: ['', Validators.required],
+        quantity: [1, [Validators.required, Validators.min(0)]],
+        price: [0, [Validators.required, Validators.min(0)]],
+        total: [0],
+      })
+    );
+    this.calculateTotal();
+  }
+
+  removeItem(index: number): void {
+    this.items.removeAt(index);
+    this.calculateTotal();
+  }
+
+  calculateItems(index: number): void {
+    const item = this.items.at(index);
+    const quantity = item.get('quantity')?.value || 0;
+    const price = item.get('price')?.value || 0;
+    item.patchValue({
+      total: quantity * price,
+    });
+    this.calculateTotal();
+  }
+
+  calculateTotal(): void {
+    let subTotal = 0;
+    this.items.controls.forEach((item) => {
+      const amount = item.get('total')?.value || 0;
+      subTotal += amount;
+    });
+
+    const taxRate = this.documentForm.get('taxRate')?.value || 0;
+    const taxAmount = (subTotal * taxRate) / 100;
+    const total = subTotal + taxAmount;
+    this.documentForm.patchValue({
+      subTotal: subTotal,
+      taxAmount: taxAmount,
+      total: total
+    })
+  }
+
+  generateDocumentNumber(): string {
+    const prefix = this.documentType().charAt(0).toUpperCase();
+    const rand = Math.floor(Math.random() * 9000) + 1000;
+    return `${prefix}-${rand}`;
+  }
+
+  onSave(): void {
+    if (this.documentForm.valid) {
+      this.formSubmit.emit(this.documentForm)
     }
+  }
 }
