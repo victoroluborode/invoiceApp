@@ -58,7 +58,7 @@
                         <input type="number" formControlName="price" (input)="calculateItems(i)">
                     </div>
                     <div class="item-total">
-                        Total: {{ item.get('total')?.value | currency }}
+                        Total: {{ item.get('total')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}
                     </div>
                     <button type="button" (click)="removeItem(i)">Remove</button>
                 </div>
@@ -70,7 +70,7 @@
             <h3>Totals</h3>
             <div class="totals-row">
                 <label>Subtotal:</label>
-                <span>{{ documentForm.get('subTotal')?.value | currency }}</span>
+                <span>{{ documentForm.get('subTotal')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG'  }}</span>
             </div>
             <div class="totals-row">
                 <label>Tax Rate:</label>
@@ -78,11 +78,11 @@
             </div>
             <div class="totals-row">
                 <label>Tax Amount:</label>
-                <span>{{ documentForm.get('taxAmount')?.value | currency }}</span>
+                <span>{{ documentForm.get('taxAmount')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</span>
             </div>
             <div class="totals-row grand-total">
                 <label>Total:</label>
-                <span>{{ documentForm.get('total')?.value | currency }}</span>
+                <span>{{ documentForm.get('total')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</span>
             </div>
         </div>
 
