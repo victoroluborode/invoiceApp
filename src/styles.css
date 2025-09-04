@@ -1,24 +1,10 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: #f5f7fb;
-    color: rgba(0, 0, 0, 0.87);
-}
-
-.full-width {
-    width: 100%;
-}
-
-.container {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 16px;
-    padding: 16px;
-}
-
-@media (max-width: 960px) {
-    .container {
-        grid-template-columns: 1fr;
-    }
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+        font-size: .875rem;
+        line-height: 1.35rem;
+    background: #ebedf0;
+    color: rgb(0, 0, 0);
 }

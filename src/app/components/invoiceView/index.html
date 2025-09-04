@@ -1,0 +1,24 @@
+<div class="mb-3 form-section">
+    <h3>Items</h3>
+    <div formArrayName="items">
+        @for (item of items.controls; track $index) {
+        <div [formGroupName]="$index" class="line-item-row">
+            <div class="item-fields">
+                <label class="form-label" for="description">Description</label>
+                <input type="text" formControlName="description">
+
+                <label class="form-label" for="quantity">Quantity</label>
+                <input type="number" formControlName="quantity" (input)="calculateItems($index)">
+
+                <label class="form-label" for="price">Price</label>
+                <input type="number" formControlName="price" (input)="calculateItems($index)">
+            </div>
+            <div class="item-total">
+                Total: {{ item.get('total')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}
+            </div>
+            <button class="btn btn-dark btn-sm" type="button" (click)="removeItem($index)">Remove</button>
+        </div>
+        }
+    </div>
+    <button class="btn btn-dark btn-sm" type="button" (click)="addItem()">Add Item</button>
+</div>

@@ -1,6 +1,13 @@
 import { Component, input, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormArray, FormBuilder, ReactiveFormsModule, Validators, FormGroup} from '@angular/forms';
+import {
+  FormControl,
+  FormArray,
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { Document } from '../../interfaces/document.interface';
 
 @Component({
@@ -12,7 +19,7 @@ import { Document } from '../../interfaces/document.interface';
 })
 export class InvoiceFormComponent implements OnInit {
   documentType = input<'invoice' | 'quotation' | 'receipt'>('invoice');
-  formSubmit = output<FormGroup>()
+  formSubmit = output<FormGroup>();
   documentForm!: FormGroup;
 
   constructor(private fb: FormBuilder) {}
@@ -43,9 +50,12 @@ export class InvoiceFormComponent implements OnInit {
   get items(): FormArray {
     return this.documentForm.get('items') as FormArray;
   }
+
   addItem(): void {
     this.items.push(
       this.fb.group({
+        // Add a unique ID to each item
+        id: Date.now(),
         description: ['', Validators.required],
         quantity: [1, [Validators.required, Validators.min(0)]],
         price: [0, [Validators.required, Validators.min(0)]],
@@ -83,8 +93,8 @@ export class InvoiceFormComponent implements OnInit {
     this.documentForm.patchValue({
       subTotal: subTotal,
       taxAmount: taxAmount,
-      total: total
-    })
+      total: total,
+    });
   }
 
   generateDocumentNumber(): string {
@@ -95,7 +105,12 @@ export class InvoiceFormComponent implements OnInit {
 
   onSave(): void {
     if (this.documentForm.valid) {
-      this.formSubmit.emit(this.documentForm)
+      this.formSubmit.emit(this.documentForm);
     }
+  }
+
+  // Add the trackBy function to uniquely identify each item
+  trackById(index: number, item: any): number {
+    return item.value.id;
   }
 }
