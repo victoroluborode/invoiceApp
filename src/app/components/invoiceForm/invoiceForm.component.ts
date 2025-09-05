@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit } from '@angular/core';
+import { Component, input, output, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -9,6 +9,8 @@ import {
   FormGroup,
 } from '@angular/forms';
 import { Document } from '../../interfaces/document.interface';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-invoice-form',
@@ -21,6 +23,8 @@ export class InvoiceFormComponent implements OnInit {
   documentType = input<'invoice' | 'quotation' | 'receipt'>('invoice');
   formSubmit = output<FormGroup>();
   documentForm!: FormGroup;
+
+  @ViewChild('pdfContainer') pdfContainer!: ElementRef;
 
   constructor(private fb: FormBuilder) {}
 
@@ -41,7 +45,9 @@ export class InvoiceFormComponent implements OnInit {
       taxRate: [0],
       taxAmount: [0],
       total: [0],
+      // Notes and dueDate fields are now included in the form
       notes: [''],
+      dueDate: [''],
     });
 
     this.addItem();
@@ -54,7 +60,6 @@ export class InvoiceFormComponent implements OnInit {
   addItem(): void {
     this.items.push(
       this.fb.group({
-        // Add a unique ID to each item
         id: Date.now(),
         description: ['', Validators.required],
         quantity: [1, [Validators.required, Validators.min(0)]],
@@ -109,8 +114,51 @@ export class InvoiceFormComponent implements OnInit {
     }
   }
 
-  // Add the trackBy function to uniquely identify each item
   trackById(index: number, item: any): number {
     return item.value.id;
+  }
+
+  generatePDF(): void {
+    const data = this.pdfContainer.nativeElement;
+
+    html2canvas(data, {
+      scale: 1.3,
+      height: data.scrollHeight,
+      width: data.scrollWidth,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.75);
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 5;
+
+      const imgWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = margin;
+
+      pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight - margin;
+
+      while (heightLeft > 0) {
+        position -= pageHeight - margin;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight - margin;
+      }
+
+      pdf.save(`${this.documentType()}-${this.documentForm.get('number')?.value}.pdf`);
+    });
+  }
+
+  saveAndDownload(): void {
+    this.onSave();
+    this.generatePDF();
   }
 }

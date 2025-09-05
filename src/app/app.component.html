@@ -1,19 +1,7 @@
 <div class=" container-fluid">
   <div class="row">
-  <div class="form-panel">
-    <app-invoice-form (formSubmit)="onFormSubmit($event)"></app-invoice-form>
-  </div>
-  <div class="preview-panel">
-    @if (documentData) {
-    <app-invoice-view [document]="documentData" id="documentPreview"></app-invoice-view>
-    <div class="download-button-container">
-      <button type="button" (click)="onDownloadPdf()" class="btn btn-dark btn-lg">Download PDF</button>
+    <div class="form-panel">
+      <app-invoice-form (formSubmit)="onFormSubmit($event)"></app-invoice-form>
     </div>
-    
-    } @else {
-    <p>Fill out the form to see preview</p>
-    }
   </div>
-  </div>
-</div> 
-
+</div>

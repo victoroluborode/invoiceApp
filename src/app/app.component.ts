@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InvoiceFormComponent } from './components/invoiceForm/invoiceForm.component';
-import { InvoiceViewComponent } from './components/invoiceView/invoiceView.component';
 import { FormGroup } from '@angular/forms';
 import { PdfService } from './services/pdf.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, InvoiceFormComponent, InvoiceViewComponent],
+  imports: [CommonModule, InvoiceFormComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

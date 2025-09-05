@@ -1,5 +1,5 @@
 <div class="container-sm mx-auto invoice-form-container">
-    <form [formGroup]="documentForm" (ngSubmit)="onSave()">
+    <form [formGroup]="documentForm">
         <div class="row g-3 my-4">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -17,6 +17,15 @@
                     <input class="form-control" type="date" id="date" formControlName="date">
                 </div>
             </div>
+
+            @if (documentForm.get('type')?.value === 'invoice' || documentForm.get('type')?.value === 'receipt') {
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label" for="dueDate">Due Date</label>
+                    <input class="form-control" type="date" id="dueDate" formControlName="dueDate">
+                </div>
+            </div>
+            }
         </div>
 
         <div class="row g-3 my-4">
@@ -130,8 +139,89 @@
             </div>
         </div>
 
+        <div class="row g-3 my-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label" for="notes">Notes:</label>
+                    <textarea class="form-control" id="notes" formControlName="notes"></textarea>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-3 text-center mt-4">
-            <button class="btn btn-dark btn-sm" type="submit">Save Document</button>
+            <button class="btn btn-dark btn-lg" type="button" (click)="saveAndDownload()">Save and Download PDF</button>
         </div>
     </form>
+</div>
+
+<div class="pdf-container" #pdfContainer>
+    <div class="invoice-preview-container">
+        <div class="invoice-preview">
+            <div class="preview-header">
+                <div>
+                    <h3>{{ documentForm.get('companyName')?.value }}</h3>
+                    <p>{{ documentForm.get('companyAddress')?.value }}</p>
+                    <p>{{ documentForm.get('companyEmail')?.value }} | {{ documentForm.get('companyPhone')?.value }}</p>
+                </div>
+                <div class="document-details-no-border">
+                    <h3 class="document-title">{{ documentForm.get('type')?.value | titlecase }}</h3>
+                    <p><strong>Document #:</strong> {{ documentForm.get('number')?.value }}</p>
+                    <p><strong>Date:</strong> {{ documentForm.get('date')?.value }}</p>
+                    @if (documentForm.get('type')?.value === 'invoice' || documentForm.get('type')?.value === 'receipt')
+                    {
+                    <p><strong>Due Date:</strong> {{ documentForm.get('dueDate')?.value }}</p>
+                    }
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="preview-customer">
+                <h3>Bill To:</h3>
+                <p><strong>{{ documentForm.get('customerName')?.value }}</strong></p>
+                <p>{{ documentForm.get('customerAddress')?.value }}</p>
+                <p>{{ documentForm.get('customerEmail')?.value }}</p>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of items.controls; track trackById($index, item)) {
+                    <tr>
+                        <td>{{ item.get('description')?.value }}</td>
+                        <td>{{ item.get('quantity')?.value }}</td>
+                        <td>{{ item.get('price')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</td>
+                        <td>{{ item.get('total')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG'}}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="totals-section">
+                <div class="totals-row">
+                    <span>Subtotal:</span>
+                    <span>{{ documentForm.get('subTotal')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</span>
+                </div>
+                <div class="totals-row">
+                    <span>Tax ({{ documentForm.get('taxRate')?.value }}%):</span>
+                    <span>{{ documentForm.get('taxAmount')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>Total:</span>
+                    <span>{{ documentForm.get('total')?.value | currency: 'NGN' :'symbol':'1.2-2':'en-NG' }}</span>
+                </div>
+            </div>
+
+            <div class="notes-section">
+                <p>{{ documentForm.get('notes')?.value }}</p>
+            </div>
+        </div>
+    </div>
 </div>
